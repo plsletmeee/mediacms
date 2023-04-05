@@ -51,7 +51,7 @@ su -c "psql -c \"CREATE DATABASE mediacms\"" postgres
 su -c "psql -c \"CREATE USER mediacms WITH ENCRYPTED PASSWORD 'mediacms'\"" postgres
 su -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE mediacms TO mediacms\"" postgres
 
-echo 'Creating python virtualenv on /home/mediacms.io'
+echo 'Creating python3 virtualenv on /home/mediacms.io'
 
 cd /home/mediacms.io
 virtualenv . --python=python3
@@ -59,7 +59,7 @@ source  /home/mediacms.io/bin/activate
 cd mediacms
 pip install -r requirements.txt
 
-SECRET_KEY=`python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'`
+SECRET_KEY=`python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'`
 
 # remove http or https prefix
 FRONTEND_HOST=`echo "$FRONTEND_HOST" | sed -r 's/http:\/\///g'`
@@ -78,15 +78,15 @@ echo "LOCAL_INSTALL = True" >> cms/local_settings.py
 
 mkdir logs
 mkdir pids
-python manage.py migrate
-python manage.py loaddata fixtures/encoding_profiles.json
-python manage.py loaddata fixtures/categories.json
-python manage.py collectstatic --noinput
+python3 manage.py migrate
+python3 manage.py loaddata fixtures/encoding_profiles.json
+python3 manage.py loaddata fixtures/categories.json
+python3 manage.py collectstatic --noinput
 
-ADMIN_PASS=`python -c "import secrets;chars = 'abcdefghijklmnopqrstuvwxyz0123456789';print(''.join(secrets.choice(chars) for i in range(10)))"`
-echo "from users.models import User; User.objects.create_superuser('admin', 'admin@example.com', '$ADMIN_PASS')" | python manage.py shell
+ADMIN_PASS=`python3 -c "import secrets;chars = 'abcdefghijklmnopqrstuvwxyz0123456789';print(''.join(secrets.choice(chars) for i in range(10)))"`
+echo "from users.models import User; User.objects.create_superuser('admin', 'admin@example.com', '$ADMIN_PASS')" | python3 manage.py shell
 
-echo "from django.contrib.sites.models import Site; Site.objects.update(name='$FRONTEND_HOST', domain='$FRONTEND_HOST')" | python manage.py shell
+echo "from django.contrib.sites.models import Site; Site.objects.update(name='$FRONTEND_HOST', domain='$FRONTEND_HOST')" | python3 manage.py shell
 
 chown -R www-data. /home/mediacms.io/
 cp deploy/local_install/celery_long.service /etc/systemd/system/celery_long.service && systemctl enable celery_long && systemctl start celery_long
